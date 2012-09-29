@@ -27,6 +27,7 @@ NAME_TRANSFORM_RE = re.compile('([A-Z])')
 primary_widgets = []
 secondary_widgets = []
 
+CACHED_WIDGETS = []
 
 class Widget(object):
     """The base class for an Administration Dashboard widget.
@@ -56,6 +57,8 @@ class Widget(object):
         self.name = NAME_TRANSFORM_RE.sub(
             lambda m: '-%s' % m.group(1).lower(),
             self.__class__.__name__)[1:]
+        if self.__class__.cache_data:
+            CACHED_WIDGETS.append('w-%s' % self.name)
 
     def render(self, request):
         """Renders a widget.
@@ -189,10 +192,6 @@ class RepositoriesWidget(Widget):
         return {
             'repositories': repos[:self.MAX_REPOSITORIES]
         }
-
-    def generate_cache_key(self, request):
-        return "w-%s-%s-%s" % (self.name, request.user.username,
-                               str(datetime.date.today()))
 
 
 class ReviewGroupsWidget(Widget):
